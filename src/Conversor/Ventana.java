@@ -1,163 +1,49 @@
 package Conversor;
 
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-import java.awt.Dimension;
 import java.awt.Rectangle;
-import java.awt.FlowLayout;
 import java.awt.Component;
 import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
-import java.awt.ComponentOrientation;
 import java.awt.Font;
-import javax.swing.BoxLayout;
+
 import javax.swing.JLabel;
 import java.awt.Color;
-import javax.swing.UIManager;
-import javax.swing.border.SoftBevelBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.text.MaskFormatter;
-import javax.swing.border.BevelBorder;
+
 import javax.swing.JTextField;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.text.DecimalFormat;
-import java.text.ParseException;
 
 import javax.swing.JButton;
-import javax.swing.JFormattedTextField;
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.InputMethodListener;
-import java.awt.event.InputMethodEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.lang.reflect.Proxy;
-import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.io.*;
+import java.text.DecimalFormat;
+import java.text.Format;
+import java.text.NumberFormat;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.swing.SwingConstants;
 
 public class Ventana extends JFrame {
 
+	private static final long serialVersionUID = 2011049950654770279L;
 	private JPanel contentPane;
 	private JTextField textField_monto;
+	public JLabel labelFecha;
 
-	/**
-	 * Launch the application.
-	 * Request request = new Request.Builder()
-      .url("https://api.apilayer.com/exchangerates_data/symbols")
-      .addHeader
-	 * 
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					Ventana frame = new Ventana();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
+	private JComboBox<String> comboBox_out;
+	private JComboBox<String> comboBox_in;
 
+	private JLabel Label_resultado;
 
-		String apiKey = "Hr0Qt823razxxfVETWoWxSFK3WzllpH4";
-		
-		try {
-			HttpClient cliente = HttpClient.newHttpClient();
-			
-			String url = "https://api.apilayer.com/exchangerates_data/latest?symbols=ARS,CLP,CNY,COP,EUR,UYU&base=USD";
-			HttpRequest solicitud = HttpRequest.newBuilder(URI.create(url)).header("apiKey", apiKey).build();
-		
-			HttpResponse<String> respuesta = cliente.send(solicitud, HttpResponse.BodyHandlers.ofString());
-
-			if (respuesta.statusCode() > 299){
-				System.out.println("Hubo un error en la solicitud");
-			}
-			Object objFicticio = {
-		    "success": true,
-		    "timestamp": 1654711624,
-		    "base": "USD",
-		    "date": "2022-06-08",
-		    "rates": {
-		        "ARS": 121.458403,
-		        "CLP": 821.598176,
-		        "CNY": 6.683702,
-		        "COP": 3797.53,
-		        "EUR": 0.93303,
-		        "UYU": 39.693916
-		    }
-		    }
-		
-			Object obj = respuesta.body().toString();
-			System.out.println(obj);
-		
-		}catch(Exception e){
-			System.out.println(e);
-		}
-		/** ARS,CLP,CNY,COP,EUR,UYU
-		 * 
-		 * "ARS": "Argentine Peso",
-    		"CLP": "Chilean Peso",
-    		"CNY": "Chinese Yuan",
-    		"COP": "Colombian Peso",
-    		"EUR": "Euro",
-    		"USD": "United States Dollar",
-    		"UYU": "Uruguayan Peso"    
-    		
-		 */
-		
-		
-		
-//		try {
-//			URL url = new URL("http://api.fixer.io/latest?base=USD");
-//
-//			HttpURLConnection conexion = (HttpURLConnection) url.openConnection();
-//
-//			conexion.setRequestMethod("GET");
-//
-//			conexion.setRequestProperty("Accept", "application/json");
-//
-//			conexion.addRequestProperty("apiKey", apiKey);
-//
-//			if (conexion.getResponseCode() != 200) {
-//				throw new RuntimeException("Intento Fallido : codigo de error HTTP: " + conexion.getResponseCode());
-//			}
-//
-//			BufferedReader br = new BufferedReader(new InputStreamReader((conexion.getInputStream())));
-//
-//			String output;
-//
-//			while ((output = br.readLine()) != null) {
-//				System.out.println(output);
-//			}
-//
-//			conexion.disconnect();
-//
-//		} catch (MalformedURLException e) {
-//			e.printStackTrace();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-
-	}
+	private Map<String, String> mapMonedaCodigo = new HashMap<String, String>();
 
 	/**
 	 * Create the frame.
@@ -168,7 +54,7 @@ public class Ventana extends JFrame {
 		setTitle("Conversor De Moneda");
 		setBounds(new Rectangle(0, 0, 475, 300));
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 487, 300);
+		setBounds(100, 100, 487, 370);
 		contentPane = new JPanel();
 		contentPane.setBounds(new Rectangle(0, 0, 475, 300));
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -180,72 +66,82 @@ public class Ventana extends JFrame {
 		panel.setForeground(new Color(102, 102, 153));
 		panel.setAlignmentX(Component.LEFT_ALIGNMENT);
 		panel.setBounds(new Rectangle(0, 0, 500, 300));
-		panel.setBounds(0, 0, 470, 262);
+		panel.setBounds(0, 0, 470, 332);
 		contentPane.add(panel);
 		panel.setLayout(null);
-
-		JLabel Label_resultado = new JLabel("Pesos Argentinos:");
-		Label_resultado.setVisible(false);
-		Label_resultado.setBounds(76, 204, 292, 32);
-		panel.add(Label_resultado);
-		Label_resultado.setFont(new Font("Candara", Font.PLAIN, 15));
 
 		JPanel panel_resultado = new JPanel();
 		panel_resultado.setForeground(new Color(51, 51, 51));
 		panel_resultado.setBackground(new Color(204, 204, 204));
-		panel_resultado.setBounds(76, 204, 292, 32);
+		panel_resultado.setBounds(76, 247, 304, 32);
 		panel_resultado.setVisible(false);
+
+		labelFecha = new JLabel("01/01/2000");
+		labelFecha.setFont(new Font("Candara", Font.PLAIN, 17));
+		labelFecha.setHorizontalAlignment(SwingConstants.CENTER);
+		labelFecha.setBounds(262, 19, 118, 32);
+		panel.add(labelFecha);
+
+		JLabel labelTitulo = new JLabel("Fecha del tipo de moneda: ");
+		labelTitulo.setHorizontalAlignment(SwingConstants.CENTER);
+		labelTitulo.setFont(new Font("Candara", Font.PLAIN, 15));
+		labelTitulo.setBounds(76, 19, 176, 32);
+		panel.add(labelTitulo);
+
+		JPanel panel_1 = new JPanel();
+		panel_1.setBounds(76, 19, 304, 32);
+		panel.add(panel_1);
+
+		Label_resultado = new JLabel("Pesos Argentinos:");
+		Label_resultado.setHorizontalAlignment(SwingConstants.CENTER);
+		Label_resultado.setBounds(76, 247, 304, 32);
+		panel.add(Label_resultado);
+		Label_resultado.setVisible(false);
+		Label_resultado.setFont(new Font("Candara", Font.PLAIN, 15));
 		panel.add(panel_resultado);
 		panel_resultado.setLayout(null);
 
-		JComboBox comboBox = new JComboBox();
-		comboBox.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e) {
-
-				String item1 = (String) comboBox.getSelectedItem();
-				System.out.println(item1);
-				System.out.println("-----");
-
-			}
-		});
-		comboBox.setName("selector-modena-input");
-		comboBox.setForeground(new Color(0, 0, 0));
-		comboBox.setBackground(new Color(153, 153, 153));
-		comboBox.setBounds(220, 30, 148, 29);
-		comboBox.setFont(new Font("Candara", Font.PLAIN, 14));
-		comboBox.setModel(
-				new DefaultComboBoxModel(new String[] { "Dolar", "Euro", "Peso Argentino", "Peso Uruguayo" }));
-		panel.add(comboBox);
+		comboBox_in = new JComboBox<String>();
+		comboBox_in.setName("selector-modena-input");
+		comboBox_in.setForeground(new Color(0, 0, 0));
+		comboBox_in.setBackground(new Color(153, 153, 153));
+		comboBox_in.setBounds(220, 76, 160, 29);
+		comboBox_in.setFont(new Font("Candara", Font.PLAIN, 14));
+		comboBox_in.setModel(
+				new DefaultComboBoxModel<String>(new String[] { "Dolar", "Euro", "Peso Argentino", "Peso Uruguayo" }));
+		comboBox_in.setSelectedItem(0);
+		panel.add(comboBox_in);
 
 		JLabel lblNewLabel = new JLabel("Elegir Moneda");
 		lblNewLabel.setForeground(new Color(204, 204, 204));
 		lblNewLabel.setFont(new Font("Candara", Font.PLAIN, 16));
 		lblNewLabel.setToolTipText("");
-		lblNewLabel.setBounds(76, 30, 107, 29);
+		lblNewLabel.setBounds(76, 76, 107, 29);
 		panel.add(lblNewLabel);
 
 		JLabel lblConvertirA = new JLabel("Convertir a");
 		lblConvertirA.setForeground(new Color(204, 204, 204));
 		lblConvertirA.setToolTipText("");
 		lblConvertirA.setFont(new Font("Candara", Font.PLAIN, 16));
-		lblConvertirA.setBounds(76, 113, 107, 29);
+		lblConvertirA.setBounds(76, 156, 107, 29);
 		panel.add(lblConvertirA);
 
-		JComboBox comboBox_1 = new JComboBox();
-		comboBox_1.setModel(
-				new DefaultComboBoxModel(new String[] { "Peso Argentino", "Peso Uruguayo", "Dolar", "Euro" }));
-		comboBox_1.setName("selector-modena-output");
-		comboBox_1.setForeground(new Color(0, 0, 0));
-		comboBox_1.setFont(new Font("Candara", Font.PLAIN, 14));
-		comboBox_1.setBackground(new Color(153, 153, 153));
-		comboBox_1.setBounds(220, 113, 148, 29);
-		panel.add(comboBox_1);
+		comboBox_out = new JComboBox<String>();
+		comboBox_out.setModel(
+				new DefaultComboBoxModel<String>(new String[] { "Peso Argentino", "Euro", "Peso Uruguayo", "Dolar" }));
+		comboBox_out.setSelectedItem(0);
+		comboBox_out.setName("selector-modena-output");
+		comboBox_out.setForeground(new Color(0, 0, 0));
+		comboBox_out.setFont(new Font("Candara", Font.PLAIN, 14));
+		comboBox_out.setBackground(new Color(153, 153, 153));
+		comboBox_out.setBounds(220, 156, 160, 29);
+		panel.add(comboBox_out);
 
 		JLabel lblMonto = new JLabel("Monto:");
 		lblMonto.setToolTipText("");
 		lblMonto.setForeground(new Color(204, 204, 204));
 		lblMonto.setFont(new Font("Candara", Font.PLAIN, 16));
-		lblMonto.setBounds(76, 73, 107, 29);
+		lblMonto.setBounds(76, 116, 107, 29);
 		panel.add(lblMonto);
 
 		JButton btnConvertir = new JButton("Convertir");
@@ -256,8 +152,9 @@ public class Ventana extends JFrame {
 				if (todobien && btnConvertir.isEnabled()) {
 					panel_resultado.setVisible(true);
 					Label_resultado.setVisible(true);
-
+					calcularMoneda();
 				}
+
 			}
 		});
 		btnConvertir.setEnabled(false);
@@ -267,7 +164,7 @@ public class Ventana extends JFrame {
 			}
 		});
 		btnConvertir.setFont(new Font("Candara", Font.PLAIN, 18));
-		btnConvertir.setBounds(120, 153, 193, 40);
+		btnConvertir.setBounds(119, 196, 210, 40);
 		panel.add(btnConvertir);
 
 		textField_monto = new JTextField();
@@ -318,8 +215,49 @@ public class Ventana extends JFrame {
 			}
 		});
 
-		textField_monto.setBounds(220, 70, 148, 29);
+		textField_monto.setBounds(220, 116, 160, 29);
 		panel.add(textField_monto);
 		textField_monto.setColumns(10);
+
+		// "Dolar", "Euro", "Peso Argentino", "Peso Uruguayo"
+		mapMonedaCodigo.put("Dolar", "USD");
+		mapMonedaCodigo.put("Euro", "EUR");
+		mapMonedaCodigo.put("Peso Argentino", "ARS");
+		mapMonedaCodigo.put("Peso Uruguayo", "UYU");
+
+	}
+
+	protected void calcularMoneda() {
+
+		Double montoInicial = Double.parseDouble(textField_monto.getText());
+		Double montoDolares;
+		Double montoFinal;
+		
+		// obtiene la moneda seleccionada
+		String monedaIn = (String) comboBox_in.getSelectedItem();
+		String monedaOut = (String) comboBox_out.getSelectedItem();
+
+		// convierte la moneda al codigo symbol
+		String symbolIn = mapMonedaCodigo.get(monedaIn); // Ej. EUR
+		String symbolOut = mapMonedaCodigo.get(monedaOut);
+		
+		if (symbolIn == "USD") {
+			montoDolares = montoInicial;			
+		} else {
+			Double tasaOtro = Main.dolar.getTarifas().get(symbolIn);
+			montoDolares = montoInicial / tasaOtro;
+		}
+		
+		Double tasa = 1.0;
+		if (symbolOut != "USD") {
+			tasa = Main.dolar.getTarifas().get(symbolOut);
+		}
+		montoFinal = montoDolares * tasa;
+
+		
+		NumberFormat formatoMoneda = NumberFormat.getCurrencyInstance();
+		
+		Label_resultado.setText(monedaOut + ": " + formatoMoneda.format(montoFinal));
+
 	}
 }
