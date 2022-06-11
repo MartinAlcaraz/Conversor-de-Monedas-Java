@@ -1,45 +1,31 @@
 package Conversor;
 
-import java.awt.EventQueue;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Main {
 
-	static Ventana frame;
-	
+	public static Ventana frame;
+
 	public static TipoDeCambio dolar;
 
-	/**
-	 * Launch the application.
-	 */
 	public static void main(String[] args) {
-		
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					frame = new Ventana();
-					frame.setVisible(true);
-					
-					
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-		getDolar();
-		
-		System.out.println(dolar.getTarifas());
-		String fecha = dolar.getDate();
-		actualizarFecha(fecha);	
-						
-	}
 
+		frame = new Ventana();
+		frame.setVisible(true);
+
+		setDatos();
+			
+		getDolar( getDolarActual() );
+		String fecha = dolar.getDate();
+		actualizarFecha(fecha);
+	}
+	
+	
 	// actualiza fecha en labelFecha
 	public static void actualizarFecha(String fecha) {
 
@@ -47,7 +33,7 @@ public class Main {
 		SimpleDateFormat formatoEntrada = new SimpleDateFormat("yyyy-mm-dd");
 		// formato deseado
 		SimpleDateFormat formatoSalida = new SimpleDateFormat("dd/mm/yyyy");
-		
+
 		java.util.Date fecha2 = null;
 		try {
 			fecha2 = formatoEntrada.parse(fecha);
@@ -55,25 +41,22 @@ public class Main {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		frame.labelFecha.setText(formatoSalida.format(fecha2));
-		
-	}
-	
-	/**
-	 * Obtener el valor del dolar
-	 */
-	public static void getDolar() {
 
-		SolicitudHttp solicitud = new SolicitudHttp();
-		String respuesta = solicitud.solicitarDatosHttp();
+		frame.labelFecha.setText(formatoSalida.format(fecha2));
+
+	}
+
+	/**
+	 * Asigna el valor de la variable dolar
+	 */
+	public static void getDolar(String respuestaTarifas) {
 
 		JSONObject objJSON = null;
 		TipoDeCambio dolares = null;
 
 		Map<String, Double> tarifas = new HashMap<>();
 		try {
-			objJSON = new JSONObject(respuesta);
+			objJSON = new JSONObject(respuestaTarifas);
 
 			String base = objJSON.getString("base");
 			String date = objJSON.getString("date");
@@ -101,4 +84,47 @@ public class Main {
 
 		dolar = dolares;
 	}
+
+	public static void setDatos() {
+
+		SolicitudHttp solicitud = new SolicitudHttp();
+		String respuesta = solicitud.solicitarDatosViejos();
+		getDolar(respuesta);
+		actualizarFecha(dolar.getDate());
+	}
+
+	/**
+	 * solicita el tipo de cambio actual
+	 */
+	public static String getDolarActual() {
+
+		SolicitudHttp solicitud = new SolicitudHttp();
+		String respuesta = solicitud.solicitarDatosHttp();
+		System.out.println("se actualizo el dolar");
+		return respuesta;
+	}
+	
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

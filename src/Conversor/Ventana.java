@@ -5,6 +5,8 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import java.awt.Rectangle;
 import java.awt.Component;
+import java.awt.EventQueue;
+
 import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
 import java.awt.Font;
@@ -23,8 +25,6 @@ import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.text.DecimalFormat;
-import java.text.Format;
 import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,6 +44,21 @@ public class Ventana extends JFrame {
 	private JLabel Label_resultado;
 
 	private Map<String, String> mapMonedaCodigo = new HashMap<String, String>();
+
+	public static void main(String[] args) {
+
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					Ventana frame = new Ventana();
+					frame.setVisible(true);
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
 
 	/**
 	 * Create the frame.
@@ -76,7 +91,7 @@ public class Ventana extends JFrame {
 		panel_resultado.setBounds(76, 247, 304, 32);
 		panel_resultado.setVisible(false);
 
-		labelFecha = new JLabel("01/01/2000");
+		labelFecha = new JLabel("--/--/----");
 		labelFecha.setFont(new Font("Candara", Font.PLAIN, 17));
 		labelFecha.setHorizontalAlignment(SwingConstants.CENTER);
 		labelFecha.setBounds(262, 19, 118, 32);
@@ -173,12 +188,12 @@ public class Ventana extends JFrame {
 			public void keyTyped(KeyEvent e) {
 				char caracter = e.getKeyChar();
 				String texto = textField_monto.getText();
-				boolean tieneComa = texto.contains(",");
+				boolean tieneComa = texto.contains(".");
 
 				// Verificar si la tecla pulsada no es un digito
 
-				if ((((caracter < '0') || (caracter > '9')) && (caracter != '\b' && caracter != ','))
-						|| (caracter == ',' && tieneComa)) {
+				if ((((caracter < '0') || (caracter > '9')) && (caracter != '\b' && caracter != '.'))
+						|| (caracter == '.' && tieneComa) || (texto.length() > 9)) {
 					e.consume(); // ignorar el evento de teclado
 				}
 
@@ -232,7 +247,7 @@ public class Ventana extends JFrame {
 		Double montoInicial = Double.parseDouble(textField_monto.getText());
 		Double montoDolares;
 		Double montoFinal;
-		
+
 		// obtiene la moneda seleccionada
 		String monedaIn = (String) comboBox_in.getSelectedItem();
 		String monedaOut = (String) comboBox_out.getSelectedItem();
@@ -240,23 +255,22 @@ public class Ventana extends JFrame {
 		// convierte la moneda al codigo symbol
 		String symbolIn = mapMonedaCodigo.get(monedaIn); // Ej. EUR
 		String symbolOut = mapMonedaCodigo.get(monedaOut);
-		
+
 		if (symbolIn == "USD") {
-			montoDolares = montoInicial;			
+			montoDolares = montoInicial;
 		} else {
 			Double tasaOtro = Main.dolar.getTarifas().get(symbolIn);
 			montoDolares = montoInicial / tasaOtro;
 		}
-		
+
 		Double tasa = 1.0;
 		if (symbolOut != "USD") {
 			tasa = Main.dolar.getTarifas().get(symbolOut);
 		}
 		montoFinal = montoDolares * tasa;
 
-		
 		NumberFormat formatoMoneda = NumberFormat.getCurrencyInstance();
-		
+
 		Label_resultado.setText(monedaOut + ": " + formatoMoneda.format(montoFinal));
 
 	}
